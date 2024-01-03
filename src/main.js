@@ -27,12 +27,12 @@ function onSearch(event) {
             }
             listImages.innerHTML = createGalleryMarkup(data.hits);
             lightbox.refresh();
-            event.currentTarget.reset(); 
         })
         .catch((err) => {
             loader.style.display = 'none';
             console.log(err);
         });
+  event.currentTarget.reset(); 
 }
 
 function getPictures(name) {
