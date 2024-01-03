@@ -6,7 +6,7 @@ import "simplelightbox/dist/simple-lightbox.min.css";
 const formSearch = document.querySelector('.form-search');
 const listImages = document.querySelector('.gallery');
 const loader = document.querySelector('.loader');
-
+const lightbox = new SimpleLightbox('.gallery a', {captionsData:'alt',captionDelay: 250});
  
 formSearch.addEventListener('submit', onSearch);
 
@@ -15,41 +15,29 @@ function onSearch(event) {
     listImages.innerHTML = " ";
     const inputValue = event.target.elements.search.value;
     loader.style.display = 'block';
-    
-     getPictures(inputValue)
-    .then(data => {
-      loader.style.display = 'none';
 
-      if (!data.hits.length) {
-        iziToast.error({
-          message: 'Sorry, there are no images matching your search query. Please try again!',
+    getPictures(inputValue)
+        .then(data => {
+            loader.style.display = 'none';
+
+            if (!data.hits.length) {
+                iziToast.error({
+                    message: 'Sorry, there are no images matching your search query. Please try again!',
+                });
+            }
+            listImages.innerHTML = createGalleryMarkup(data.hits);
+            lightbox.refresh();
+            event.currentTarget.reset(); 
+        })
+        .catch((err) => {
+            loader.style.display = 'none';
+            console.log(err);
         });
-      }
-
-      listImages.innerHTML = ("beforeend", markup(data.hits));
-
-      const refreshPage = new SimpleLightbox('.gallery', {
-        captions: true,
-        captionsData: 'alt',
-        captionDelay: 250,
-      });
-      refreshPage.refresh();
-
-      formSearch.reset();
-    })
-    .catch((err) => {
-      loader.style.display = 'none';
-      console.log(err);
-    });
 }
 
 function getPictures(name) {
  const BASE_URL = 'https://pixabay.com/api/';
  const KEY = '41511305-1e730bfa7be67778e89c40f75';
-
-  if (name.includes(' ')) {
-    name.replace(/\s+/g, '+');
-  }
 
   const searchParams = new URLSearchParams({
     key: KEY,
@@ -68,7 +56,7 @@ function getPictures(name) {
     })
 }
 
-function markup(arr) {
+function createGalleryMarkup(arr) {
   return arr.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) =>
     `<li class="gallery-item">
           <a class="gallery-link" href="${largeImageURL}">
@@ -100,4 +88,3 @@ function markup(arr) {
         </li>`)
     .join('');
 }
-
